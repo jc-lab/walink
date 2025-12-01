@@ -1,0 +1,46 @@
+{
+  "name": "walink",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typed value bridge between host (Node/Browser) and wasm (C++/Emscripten) using WL_VALUE.",
+  "type": "module",
+  "main": "./dist/walink.cjs",
+  "module": "./dist/walink.mjs",
+  "types": "./dist/walink.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/walink.cjs",
+      "import": "./dist/walink.mjs",
+      "types": "./dist/walink.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "rolldown -c",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest"
+  },
+  "keywords": [
+    "wasm",
+    "emscripten",
+    "typed-values",
+    "bridge",
+    "walink"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "rolldown": "^0.14.0",
+    "typescript": "^5.6.0",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "msgpackr": "^1.11.5"
+  }
+}

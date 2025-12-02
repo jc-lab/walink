@@ -1,0 +1,50 @@
+{
+  "name": "walink",
+  "version": "0.1.0",
+  "description": "Typed value bridge between host (Node/Browser) and wasm (C++/Emscripten) using WL_VALUE.",
+  "type": "module",
+  "main": "./dist/walink.cjs",
+  "module": "./dist/walink.mjs",
+  "types": "./dist/walink.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/walink.cjs",
+      "import": "./dist/walink.mjs",
+      "types": "./dist/walink.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "rollup -c rollup.config.mts",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "wasm",
+    "emscripten",
+    "typed-values",
+    "bridge",
+    "walink"
+  ],
+  "author": "Joseph Lee <joseph@jc-lab.net>",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "rollup": "^4.53.3",
+    "tslib": "^2.8.1",
+    "typescript": "^5.6.0",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "msgpackr": "^1.11.5"
+  }
+}

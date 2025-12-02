@@ -30,7 +30,7 @@ jobs:
           node-version: '22'
 
       - name: Install pnpm
-        run: npm install -g pnpm@8
+        run: npm install -g pnpm@10
 
       - name: Install JS deps
         working-directory: node
@@ -60,7 +60,7 @@ jobs:
 
       - name: Install JS deps
         working-directory: node
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Set package.json version from tag
         working-directory: node

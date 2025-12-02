@@ -147,7 +147,7 @@ export class Walink {
     return {
       meta: meta,
       ptr: ptr,
-      view: new DataView(this.memory.buffer, ptr + 4),
+      view: new DataView(this.memory.buffer, ptr),
     }
   }
 

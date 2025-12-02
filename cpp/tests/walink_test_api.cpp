@@ -8,7 +8,7 @@
 // 라이브러리 코드와 분리하기 위해 별도 TU 및 빌드 타깃에서만 사용됩니다.
 // 메모리 할당/해제, 문자열/에러 생성은 walink 라이브러리의 공유 헬퍼를 사용합니다.
 
-namespace walink_internal {
+namespace walink {
 
 // walink 라이브러리 쪽에서 정의된 헬퍼 함수들 (cpp/src/walink.cpp)
 // 여기서는 선언만 하고, 구현은 libwalink 에서 가져옵니다.
@@ -92,7 +92,7 @@ WL_VALUE wl_roundtrip_bool(WL_VALUE value) {
 
     // BOOLEAN must be a direct value (is-address = 0)
     if (tag != WL_TAG_BOOLEAN || is_addr) {
-        return walink_internal::wl_make_error("wl_roundtrip_bool: invalid tag");
+        return walink::wl_make_error("wl_roundtrip_bool: invalid tag");
     }
 
     return value;
@@ -107,7 +107,7 @@ WL_VALUE wl_add_sint32(WL_VALUE a, WL_VALUE b) {
 
 WL_VALUE wl_make_hello_string() {
     constexpr std::string_view msg = "hello from wasm";
-    return walink_internal::wl_make_string(msg, /*free_flag_for_receiver*/ true);
+    return walink::wl_make_string(msg, /*free_flag_for_receiver*/ true);
 }
 
 WL_VALUE wl_echo_string(WL_VALUE str_value) {
@@ -115,7 +115,7 @@ WL_VALUE wl_echo_string(WL_VALUE str_value) {
     const bool is_addr = wl_is_address(str_value);
 
     if (tag != WL_TAG_STRING || !is_addr) {
-        return walink_internal::wl_make_error("wl_echo_string: invalid tag");
+        return walink::wl_make_error("wl_echo_string: invalid tag");
     }
     return str_value;
 }

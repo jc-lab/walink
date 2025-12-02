@@ -54,12 +54,15 @@ export function getAddress(memory: ArrayBuffer, value: WlValue): WlAddress {
     if (!isAddress(value)) {
         throw new Error('Expected address-based value');
     }
-
+ 
     const ptr = getValueOrAddr(value);
+    // WALink ABI: walink_alloc returns a data pointer as the payload.
+    // Meta/tag bits are stored inside the WL_VALUE itself (upper 32 bits),
+    // so read meta from the value, not from linear memory.
     return {
         ptr: ptr,
-        meta: new DataView(memory).getUint32(ptr, true),
-        view: new DataView(memory, ptr + 4),
+        meta: getMeta(value),
+        view: new DataView(memory, ptr),
     }
 }
 

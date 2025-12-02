@@ -16,7 +16,7 @@
   "scripts": {
     "build": "rolldown -c rolldown.config.mjs",
     "lint": "eslint src --ext .ts",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "keywords": [
     "wasm",

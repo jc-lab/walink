@@ -77,6 +77,13 @@ struct Float64Container {
 - 하위 32bit payload 는 `Float64Container` 가 위치한 wasm 메모리의 주소입니다.
 - 수신자는 free 플래그가 1 인 경우 `walink_free` 를 호출하여 이 컨테이너를 해제해야 합니다.
 
+# 동적 메모리 할당
+
+```
+WL_VALUE walink_alloc(uint32_t meta, uint32_t size);
+WL_VALUE walink_free(WL_VALUE value);
+```
+
 # License
 
 Apache-2.0

@@ -1,4 +1,5 @@
-import { defineConfig } from 'rolldown';
+import { defineConfig } from 'rollup';
+import typescript from '@rollup/plugin-typescript';
 
 export default defineConfig({
   input: 'src/walink.ts',
@@ -14,6 +15,7 @@ export default defineConfig({
       sourcemap: true,
     },
   ],
-  treeshake: true,
-  platform: 'neutral',
+  plugins: [
+    typescript(),
+  ]
 });

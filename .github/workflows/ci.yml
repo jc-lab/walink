@@ -94,4 +94,4 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: node
         run: |
-          npm publish --access public
+          pnpm npm publish --access public

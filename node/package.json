@@ -1,7 +1,6 @@
 {
   "name": "walink",
   "version": "0.1.0",
-  "private": true,
   "description": "Typed value bridge between host (Node/Browser) and wasm (C++/Emscripten) using WL_VALUE.",
   "type": "module",
   "main": "./dist/walink.cjs",
@@ -15,7 +14,7 @@
     }
   },
   "scripts": {
-    "build": "rolldown -c",
+    "build": "rolldown -c rolldown.config.mjs",
     "lint": "eslint src --ext .ts",
     "test": "vitest"
   },

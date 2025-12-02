@@ -52,7 +52,7 @@ export function getValueOrAddr(value: WlValue): number {
 
 export function getAddress(memory: ArrayBuffer, value: WlValue): WlAddress {
     if (!isAddress(value)) {
-        throw new Error("Expected address-based value");
+        throw new Error('Expected address-based value');
     }
 
     const ptr = getValueOrAddr(value);

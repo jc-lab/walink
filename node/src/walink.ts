@@ -131,7 +131,7 @@ export class Walink {
   constructor(options: WalinkOptions) {
     this.exports = options.exports;
     this.memory = options.exports.memory;
-    this.textDecoder = new TextDecoder("utf-8");
+    this.textDecoder = new TextDecoder('utf-8');
   }
 
   public wlValueGetAddress(value: WlValue): WlAddress {
@@ -382,7 +382,7 @@ export class Walink {
 export function createWalinkFromInstance(instance: WebAssembly.Instance): Walink {
   const exports = instance.exports as unknown as WalinkCoreExports;
   if (!(exports.memory instanceof WebAssembly.Memory)) {
-    throw new Error("walink: wasm instance.exports.memory must be a WebAssembly.Memory");
+    throw new Error('walink: wasm instance.exports.memory must be a WebAssembly.Memory');
   }
   return new Walink({ exports });
 }

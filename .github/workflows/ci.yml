@@ -60,7 +60,7 @@ jobs:
 
       - name: Install JS deps
         working-directory: node
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Set package.json version from tag
         working-directory: node

@@ -16,7 +16,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential cmake python3 emscripten
+        uses: Eeems-Org/apt-cache-action@v1
+        with:
+          packages: build-essential cmake python3 emscripten
 
       - name: Build C++ (cmake)
         working-directory: cpp
@@ -24,13 +26,18 @@ jobs:
           emcmake cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release --parallel
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
-
-      - name: Install pnpm
-        run: npm install -g pnpm@10
+          cache: 'pnpm'
+          cache-dependency-path: './node/pnpm-lock.yaml'
 
       - name: Install JS deps
         working-directory: node
@@ -48,12 +55,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
       - name: Setup Node and npm auth
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
           always-auth: true
+          cache: 'pnpm'
+          cache-dependency-path: './node/pnpm-lock.yaml'
 
       - name: Install pnpm
         run: npm install -g pnpm@10

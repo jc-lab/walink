@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include <string_view>
 
@@ -120,13 +121,6 @@ inline uint32_t wl_build_meta(uint32_t tag,
     return meta;
 }
 
-// Simple boolean factory (for return values)
-inline WL_VALUE wl_from_bool(bool b) noexcept {
-    const uint32_t payload = b ? 1u : 0u;
-    const uint32_t meta = wl_build_meta(WL_TAG_BOOLEAN, /*is_address*/ false, /*free*/false, /*user*/false);
-    return wl_make(meta, payload);
-}
-
 // String / Error factories (shared between lib and tests)
 inline WL_VALUE wl_from_address(void* ptr,
                                 uint32_t tag,
@@ -140,10 +134,49 @@ inline WL_VALUE wl_from_address(void* ptr,
 
 // Allocation helpers (declarations only; implemented in cpp)
 BaseContainer*    wl_alloc_container(uint32_t meta, uint64_t size) noexcept;
-Float64Container* wl_alloc_f64(double v) noexcept;
 WL_VALUE          wl_make_string(std::string_view sv,
                                  bool free_flag_for_receiver) noexcept;
 WL_VALUE          wl_make_error(std::string_view msg) noexcept;
+
+// ---- Convenience factories for direct-value scalars (to/from) -----------
+
+extern WL_VALUE wl_from_bool(bool b) noexcept;
+
+extern WL_VALUE wl_from_sint8(int32_t v) noexcept;
+
+extern int32_t wl_to_sint8(WL_VALUE v) noexcept;
+
+extern WL_VALUE wl_from_uint8(uint32_t v) noexcept;
+
+extern uint32_t wl_to_uint8(WL_VALUE v) noexcept;
+
+extern WL_VALUE wl_from_sint16(int32_t v) noexcept;
+
+extern int32_t wl_to_sint16(WL_VALUE v) noexcept;
+
+extern WL_VALUE wl_from_uint16(uint32_t v) noexcept;
+
+extern uint32_t wl_to_uint16(WL_VALUE v) noexcept;
+
+extern WL_VALUE wl_from_uint32(uint32_t v) noexcept;
+
+extern uint32_t wl_to_uint32(WL_VALUE v) noexcept;
+
+extern WL_VALUE wl_from_float32(float f) noexcept;
+
+extern float wl_to_float32(WL_VALUE v) noexcept;
+
+extern WL_VALUE wl_from_sint32(int32_t v) noexcept;
+
+extern int32_t wl_to_sint32(WL_VALUE v) noexcept;
+
+// ---- Address-based factories (containers / float64) ---------------------
+
+extern WL_VALUE wl_make_f64(double v, bool free_flag_for_receiver) noexcept;
+
+extern WL_VALUE wl_make_bytes(std::string_view sv, bool free_flag_for_receiver) noexcept;
+
+extern WL_VALUE wl_make_msgpack(std::string_view sv, bool free_flag_for_receiver) noexcept;
 
 } // namespace walink
 

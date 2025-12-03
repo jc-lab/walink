@@ -50,8 +50,8 @@ enum WL_TAG : uint32_t {
     WL_TAG_BYTES    = 0x01,
     // BaseContainer*
     WL_TAG_STRING   = 0x02,
-    // MsgPack 직렬화, Node 에서는 Object
-    WL_TAG_OBJECT   = 0x0100,
+    // MsgPack 직렬화, Node 에서는 Any (Object)
+    WL_TAG_MSGPACK   = 0x0100,
     // BaseContainer*; 문자열 오류 메세지, host 에서는 예외로 throw
     WL_TAG_ERROR    = 0x7fffff0,
 

@@ -17,7 +17,7 @@ export enum WlTag {
     FLOAT64 = 0x31,
     BYTES = 0x01,
     STRING = 0x02,
-    OBJECT = 0x0100,
+    MSGPACK = 0x0100,
     ERROR = 0x7fffff0,
 }
 

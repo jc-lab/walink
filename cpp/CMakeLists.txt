@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(walink_test
-    VERSION 0.1.0
+    VERSION 0.0.1
     LANGUAGES C CXX
 )
 
 # Core walink static library (pure C++20, no tests here)
 add_library(walink STATIC
-    src/walink.cpp
+    src/walink.cc
 )
 
 target_include_directories(walink

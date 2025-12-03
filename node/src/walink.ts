@@ -222,8 +222,8 @@ export class Walink {
     return this.toWlBaseContainerValue(meta, bytes);
   }
 
-  toWlObject(obj: unknown): WlValue {
-    const meta = makeMeta(WlTag.OBJECT, true, true, false);
+  toWlMsgpack(obj: unknown): WlValue {
+    const meta = makeMeta(WlTag.MSGPACK, true, true, false);
     // Accept either a pre-serialized Uint8Array or a plain JS object.
     // If it's an object, automatically serialize it with msgpackr.pack.
     if (obj instanceof Uint8Array) {
@@ -306,18 +306,18 @@ export class Walink {
     return container.viewAsUint8Array;
   }
 
-  fromWlObject(value: WlValue): Record<string, any> {
+  fromWlMsgpack<T = any>(value: WlValue): T {
     const tag = getTag(value);
-    if (tag !== WlTag.OBJECT) {
-      throw new Error(`Expected OBJECT tag, got 0x${tag.toString(16)}`);
+    if (tag !== WlTag.MSGPACK) {
+      throw new Error(`Expected MSGPACK tag, got 0x${tag.toString(16)}`);
     }
     const container = this.fromWlBaseContainer(value, false);
     try {
       // unpack returns any; cast to Record<string, any> for callers
-      return unpack(container.viewAsUint8Array) as Record<string, any>;
+      return unpack(container.viewAsUint8Array) as T;
     } catch (e) {
       // If msgpack parsing fails, surface as an error
-      throw new Error(`fromWlObject: msgpack unpack failed: ${(e as Error).message}`);
+      throw new Error(`fromWlMsgpack: msgpack unpack failed: ${(e as Error).message}`);
     } finally {
       if (hasFreeFlag(value)) {
         this.exports.walink_free(value);
@@ -367,8 +367,8 @@ export class Walink {
         return this.fromWlBytes(value);
       case WlTag.STRING:
         return this.fromWlString(value);
-      case WlTag.OBJECT:
-        return this.fromWlObject(value);
+      case WlTag.MSGPACK:
+        return this.fromWlMsgpack(value);
       case WlTag.ERROR:
         const text = this.fromWlString(value, true);
         throw new Error(text);

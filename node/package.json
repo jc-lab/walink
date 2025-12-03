@@ -1,6 +1,6 @@
 {
   "name": "walink",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Typed value bridge between host (Node/Browser) and wasm (C++/Emscripten) using WL_VALUE.",
   "type": "module",
   "main": "./dist/walink.cjs",
@@ -25,6 +25,14 @@
     "bridge",
     "walink"
   ],
+  "homepage": "https://github.com/jc-lab/walink#readme",
+  "bugs": {
+    "url": "https://github.com/jc-lab/walink/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jc-lab/walink.git"
+  },
   "author": "Joseph Lee <joseph@jc-lab.net>",
   "license": "Apache-2.0",
   "engines": {

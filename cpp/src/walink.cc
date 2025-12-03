@@ -2,56 +2,15 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <string_view>
+#include <stdexcept>
+
+static void* walink_alloc_ptr(uint32_t size) {
+    return malloc(size);
+}
 
 namespace walink {
-
-BaseContainer* wl_alloc_container(uint32_t meta, uint64_t size) noexcept {
-    // Request allocation for the BaseContainer header + payload.
-    WL_VALUE wl_value = walink_alloc(static_cast<uint32_t>(sizeof(BaseContainer) + size));
-    if (!wl_value) {
-        return nullptr;
-    }
-    // walink_alloc returns payload as data pointer; interpret directly.
-    auto* container = reinterpret_cast<BaseContainer*>(static_cast<uintptr_t>(wl_get_payload32(wl_value)));
-    container->cap = static_cast<uint32_t>(size);
-    container->size = 0;
-    return container;
-}
-
-static Float64Container* wl_alloc_f64(double v) noexcept {
-    WL_VALUE wl_value = walink_alloc(static_cast<uint32_t>(sizeof(Float64Container)));
-    if (!wl_value) {
-        return nullptr;
-    }
-    // payload is the data pointer
-    auto* c = reinterpret_cast<Float64Container*>(static_cast<uintptr_t>(wl_get_payload32(wl_value)));
-    c->v = v;
-    return c;
-}
-
-WL_VALUE wl_make_string(std::string_view sv, bool free_flag_for_receiver) noexcept {
-    uint32_t meta = wl_build_meta(WL_TAG_STRING, true, free_flag_for_receiver);
-    BaseContainer* c = wl_alloc_container(meta, sv.size());
-    if (!c) return 0;
-    if (!sv.empty()) {
-        c->size = static_cast<uint32_t>(sv.size());
-        memcpy(c->data, sv.data(), sv.size());
-    }
-    return wl_from_address(c, WL_TAG_STRING, free_flag_for_receiver);
-}
-
-WL_VALUE wl_make_error(std::string_view msg) noexcept {
-    uint32_t meta = wl_build_meta(WL_TAG_ERROR, true, true);
-    BaseContainer* c = wl_alloc_container(meta, msg.size());
-    if (!c) return 0;
-    if (!msg.empty()) {
-        c->size = static_cast<uint32_t>(msg.size());
-        memcpy(c->data, msg.data(), msg.size());
-    }
-    return wl_from_address(c, WL_TAG_ERROR, true);
-}
-
 
 // ---- Convenience factories for direct-value scalars (to/from) -----------
 
@@ -140,12 +99,49 @@ int32_t wl_to_sint32(WL_VALUE v) noexcept {
 
 // ---- Address-based factories (containers / float64) ---------------------
 
-WL_VALUE wl_make_f64(double v, bool free_flag_for_receiver) noexcept {
-    Float64Container* c = wl_alloc_f64(v);
-    if (!c) return 0;
-    return wl_from_address(c, WL_TAG_FLOAT64, free_flag_for_receiver);
+
+BaseContainer* wl_alloc_container(uint32_t /*meta*/, uint32_t size) noexcept {
+    // Allocate enough space for the header + payload
+    void* raw = walink_alloc_ptr(static_cast<uint32_t>(sizeof(BaseContainer) + size));
+    if (!raw) {
+        return nullptr;
+    }
+    auto* container = reinterpret_cast<BaseContainer*>(raw);
+    container->cap = static_cast<uint32_t>(size);
+    container->size = 0;
+    return container;
 }
 
+WL_VALUE wl_make_string(std::string_view sv, bool free_flag_for_receiver) noexcept {
+    uint32_t meta = wl_build_meta(WL_TAG_STRING, true, free_flag_for_receiver);
+    BaseContainer* c = wl_alloc_container(meta, sv.size());
+    if (!c) return 0;
+    if (!sv.empty()) {
+        c->size = static_cast<uint32_t>(sv.size());
+        memcpy(c->data, sv.data(), sv.size());
+    }
+    return wl_from_address(c, WL_TAG_STRING, free_flag_for_receiver);
+}
+
+WL_VALUE wl_make_error(std::string_view msg) noexcept {
+    uint32_t meta = wl_build_meta(WL_TAG_ERROR, true, true);
+    BaseContainer* c = wl_alloc_container(meta, msg.size());
+    if (!c) return 0;
+    if (!msg.empty()) {
+        c->size = static_cast<uint32_t>(msg.size());
+        memcpy(c->data, msg.data(), msg.size());
+    }
+    return wl_from_address(c, WL_TAG_ERROR, true);
+}
+
+WL_VALUE wl_make_f64(double v, bool free_flag_for_receiver) noexcept {
+    void* raw = walink_alloc_ptr(static_cast<uint32_t>(sizeof(Float64Container)));
+    if (!raw) return 0;
+    auto* c = reinterpret_cast<Float64Container*>(raw);
+    c->v = v;
+    return wl_from_address(c, WL_TAG_FLOAT64, free_flag_for_receiver);
+}
+ 
 WL_VALUE wl_make_bytes(std::string_view sv, bool free_flag_for_receiver) noexcept {
     const uint32_t meta = wl_build_meta(WL_TAG_BYTES, /*is_address*/ true, free_flag_for_receiver, /*user*/false);
     BaseContainer* c = wl_alloc_container(meta, sv.size());
@@ -156,7 +152,7 @@ WL_VALUE wl_make_bytes(std::string_view sv, bool free_flag_for_receiver) noexcep
     }
     return wl_from_address(c, WL_TAG_BYTES, free_flag_for_receiver);
 }
-
+ 
 WL_VALUE wl_make_msgpack(std::string_view sv, bool free_flag_for_receiver) noexcept {
     const uint32_t meta = wl_build_meta(WL_TAG_MSGPACK, /*is_address*/ true, free_flag_for_receiver, /*user*/false);
     BaseContainer* c = wl_alloc_container(meta, sv.size());
@@ -167,7 +163,101 @@ WL_VALUE wl_make_msgpack(std::string_view sv, bool free_flag_for_receiver) noexc
     }
     return wl_from_address(c, WL_TAG_MSGPACK, free_flag_for_receiver);
 }
+ 
+// ---- Converters ----------------------------------------------------------
+//
+// These helpers extract payloads from WL_VALUE. If `allow_free` is true and
+// the meta free-flag is set on the value, the underlying allocation is freed
+// by calling walink_free(v) before returning.
+ 
+std::string wl_to_string(WL_VALUE v, bool allow_free) {
+    // Strict: only accept a value whose tag is exactly WL_TAG_STRING and is address-based.
+    const uint32_t tag = wl_get_tag(v);
+    if (!wl_is_address(v) || tag != WL_TAG_STRING) {
+        throw std::runtime_error("wl_to_string: expected address-based STRING tag");
+    }
 
+    const uint32_t payload = wl_get_payload32(v);
+    auto* c = reinterpret_cast<BaseContainer*>(static_cast<uintptr_t>(payload));
+    if (!c) {
+        throw std::runtime_error("wl_to_string: null container");
+    }
+
+    std::string out;
+    if (c->size) {
+        out.assign(reinterpret_cast<const char*>(c->data), c->size);
+    }
+
+    if (allow_free) {
+        const uint32_t meta = wl_get_meta(v);
+        if (meta & WL_META_FREE_FLAG) {
+            ::walink_free(v);
+        }
+    }
+    return out;
+}
+ 
+std::string wl_to_bytes(WL_VALUE v, bool allow_free) {
+    // Strict: only accept a value whose tag is exactly WL_TAG_BYTES and is address-based.
+    const uint32_t tag = wl_get_tag(v);
+    if (!wl_is_address(v) || tag != WL_TAG_BYTES) {
+        throw std::runtime_error("wl_to_bytes: expected address-based BYTES tag");
+    }
+
+    const uint32_t payload = wl_get_payload32(v);
+    auto* c = reinterpret_cast<BaseContainer*>(static_cast<uintptr_t>(payload));
+    if (!c) {
+        throw std::runtime_error("wl_to_bytes: null container");
+    }
+
+    std::string out;
+    if (c->size) {
+        out.assign(reinterpret_cast<const char*>(c->data), c->size);
+    }
+
+    if (allow_free) {
+        const uint32_t meta = wl_get_meta(v);
+        if (meta & WL_META_FREE_FLAG) {
+            ::walink_free(v);
+        }
+    }
+    return out;
+}
+ 
+std::string wl_to_msgpack(WL_VALUE v, bool allow_free) {
+    // Strict: only accept MSGPACK tag.
+    const uint32_t tag = wl_get_tag(v);
+    if (!wl_is_address(v) || tag != WL_TAG_MSGPACK) {
+        throw std::runtime_error("wl_to_msgpack: expected address-based MSGPACK tag");
+    }
+    // Reuse wl_to_bytes which will perform the container read and free if needed.
+    return wl_to_bytes(v, allow_free);
+}
+ 
+double wl_to_f64(WL_VALUE v, bool allow_free) {
+    // Strict: only accept a value whose tag is exactly WL_TAG_FLOAT64 and is address-based.
+    const uint32_t tag = wl_get_tag(v);
+    if (!wl_is_address(v) || tag != WL_TAG_FLOAT64) {
+        throw std::runtime_error("wl_to_f64: expected address-based FLOAT64 tag");
+    }
+
+    const uint32_t payload = wl_get_payload32(v);
+    auto* f = reinterpret_cast<Float64Container*>(static_cast<uintptr_t>(payload));
+    if (!f) {
+        throw std::runtime_error("wl_to_f64: null Float64Container");
+    }
+    double result = f->v;
+
+    if (allow_free) {
+        const uint32_t meta = wl_get_meta(v);
+        if (meta & WL_META_FREE_FLAG) {
+            ::walink_free(v);
+        }
+    }
+
+    return result;
+}
+ 
 } // namespace walink
 
 extern "C" {
@@ -175,7 +265,7 @@ extern "C" {
 WL_VALUE walink_alloc(uint32_t size) noexcept {
     // Allocate exactly `size` bytes and return a WL_VALUE whose payload is the
     // data pointer (caller-visible start of the allocation).
-    char* raw = reinterpret_cast<char*>(malloc(size));
+    char* raw = reinterpret_cast<char*>(walink_alloc_ptr(size));
     if (!raw) {
         return 0;
     }

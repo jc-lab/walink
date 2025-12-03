@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <string>
 #include <string_view>
 
 // Public C ABI for walink wasm side
@@ -132,12 +133,6 @@ inline WL_VALUE wl_from_address(void* ptr,
     return wl_make(meta, payload);
 }
 
-// Allocation helpers (declarations only; implemented in cpp)
-BaseContainer*    wl_alloc_container(uint32_t meta, uint64_t size) noexcept;
-WL_VALUE          wl_make_string(std::string_view sv,
-                                 bool free_flag_for_receiver) noexcept;
-WL_VALUE          wl_make_error(std::string_view msg) noexcept;
-
 // ---- Convenience factories for direct-value scalars (to/from) -----------
 
 extern WL_VALUE wl_from_bool(bool b) noexcept;
@@ -172,11 +167,25 @@ extern int32_t wl_to_sint32(WL_VALUE v) noexcept;
 
 // ---- Address-based factories (containers / float64) ---------------------
 
+extern BaseContainer* wl_alloc_container(uint32_t meta, uint32_t size) noexcept;
+ 
+extern WL_VALUE wl_make_string(std::string_view sv, bool free_flag_for_receiver) noexcept;
+ 
+extern WL_VALUE wl_make_error(std::string_view msg) noexcept;
+ 
 extern WL_VALUE wl_make_f64(double v, bool free_flag_for_receiver) noexcept;
-
+ 
 extern WL_VALUE wl_make_bytes(std::string_view sv, bool free_flag_for_receiver) noexcept;
-
+ 
 extern WL_VALUE wl_make_msgpack(std::string_view sv, bool free_flag_for_receiver) noexcept;
+ 
+// Converters: extract data from WL_VALUE. If allow_free is true and the value
+// has the meta free-flag set, the underlying allocation will be freed via
+// walink_free.
+extern std::string wl_to_string(WL_VALUE v, bool allow_free);
+extern std::string wl_to_bytes(WL_VALUE v, bool allow_free);
+extern std::string wl_to_msgpack(WL_VALUE v, bool allow_free);
+extern double wl_to_f64(WL_VALUE v, bool allow_free);
 
 } // namespace walink
 

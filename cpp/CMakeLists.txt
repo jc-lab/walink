@@ -16,10 +16,6 @@ target_include_directories(walink
 )
 
 target_compile_features(walink PUBLIC cxx_std_20)
-target_compile_options(walink
-    PRIVATE
-        -fno-exceptions
-)
 
 # Emscripten wasm target (standalone .wasm, no JS glue)
 #

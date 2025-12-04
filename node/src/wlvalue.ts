@@ -96,12 +96,7 @@ export function getTag(value: WlValue): WlTag {
 }
  
 // Null value helper (tag = 0)
-export function wl_null(): WlValue {
-    return makeValue(0, 0);
-}
- 
-// Null value helper (tag = 0)
-export function wl_null(): WlValue {
+export function wlNull(): WlValue {
     return makeValue(0, 0);
 }
 

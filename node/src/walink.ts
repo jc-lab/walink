@@ -27,6 +27,7 @@ import {
 } from './wlvalue';
 
 import { pack, unpack } from 'msgpackr';
+import {TextEncoder} from "util";
 
 const BaseContainerSize = 8;
 
@@ -126,11 +127,13 @@ export interface WalinkOptions {
 export class Walink {
   protected readonly exports: WalinkCoreExports;
   protected readonly memory: WebAssembly.Memory;
+  private readonly textEncoder: TextEncoder;
   private readonly textDecoder: TextDecoder;
 
   constructor(options: WalinkOptions) {
     this.exports = options.exports;
     this.memory = options.exports.memory;
+    this.textEncoder = new TextEncoder();
     this.textDecoder = new TextDecoder('utf-8');
   }
 
@@ -220,6 +223,11 @@ export class Walink {
   toWlBytes(bytes: Uint8Array): WlValue {
     const meta = makeMeta(WlTag.BYTES, true, true, false);
     return this.toWlBaseContainerValue(meta, bytes);
+  }
+
+  toWlString(str: string): WlValue {
+    const meta = makeMeta(WlTag.STRING, true, true, false);
+    return this.toWlBaseContainerValue(meta, this.textEncoder.encode(str));
   }
 
   toWlMsgpack(obj: unknown): WlValue {

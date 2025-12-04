@@ -5,12 +5,12 @@ export default defineConfig({
   input: 'src/walink.ts',
   output: [
     {
-      file: 'dist/walink.mjs',
+      file: 'dist/index.mjs',
       format: 'esm',
       sourcemap: true,
     },
     {
-      file: 'dist/walink.cjs',
+      file: 'dist/index.cjs',
       format: 'cjs',
       sourcemap: true,
     },

@@ -163,6 +163,11 @@ WL_VALUE wl_make_msgpack(std::string_view sv, bool free_flag_for_receiver) noexc
     }
     return wl_from_address(c, WL_TAG_MSGPACK, free_flag_for_receiver);
 }
+  
+// Null value factory (tag = 0)
+WL_VALUE wl_null() noexcept {
+    return wl_make(0u, 0u);
+}
  
 // ---- Converters ----------------------------------------------------------
 //

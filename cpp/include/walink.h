@@ -33,6 +33,7 @@ using WL_VALUE = uint64_t;
 enum WL_TAG : uint32_t {
     // region: direct values (is-address = 0)
 
+    WL_TAG_NULL     = 0x0,
     WL_TAG_BOOLEAN  = 0x10,
     WL_TAG_SINT8    = 0x11,
     WL_TAG_UINT8    = 0x21,
@@ -178,6 +179,9 @@ extern WL_VALUE wl_make_f64(double v, bool free_flag_for_receiver) noexcept;
 extern WL_VALUE wl_make_bytes(std::string_view sv, bool free_flag_for_receiver) noexcept;
  
 extern WL_VALUE wl_make_msgpack(std::string_view sv, bool free_flag_for_receiver) noexcept;
+
+// Null value (tag = 0)
+extern WL_VALUE wl_null() noexcept;
  
 // Converters: extract data from WL_VALUE. If allow_free is true and the value
 // has the meta free-flag set, the underlying allocation will be freed via

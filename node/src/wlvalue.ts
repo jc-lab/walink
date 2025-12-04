@@ -94,6 +94,16 @@ export function getTag(value: WlValue): WlTag {
     const tagBits = meta & WL_META_TAG_MASK;
     return tagBits as WlTag;
 }
+ 
+// Null value helper (tag = 0)
+export function wl_null(): WlValue {
+    return makeValue(0, 0);
+}
+ 
+// Null value helper (tag = 0)
+export function wl_null(): WlValue {
+    return makeValue(0, 0);
+}
 
 export function hasFreeFlag(value: WlValue): boolean {
     return (getMeta(value) & WL_META_FREE_FLAG) !== 0;

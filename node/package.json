@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "description": "Typed value bridge between host (Node/Browser) and wasm (C++/Emscripten) using WL_VALUE.",
   "type": "module",
-  "main": "./dist/walink.cjs",
-  "module": "./dist/walink.mjs",
-  "types": "./dist/walink.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/walink.cjs",
-      "import": "./dist/walink.mjs",
-      "types": "./dist/walink.d.ts"
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {

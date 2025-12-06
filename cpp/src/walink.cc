@@ -201,12 +201,11 @@ std::string wl_to_string(WL_VALUE v, bool allow_free) {
     }
     return out;
 }
- 
-std::string wl_to_bytes(WL_VALUE v, bool allow_free) {
-    // Strict: only accept a value whose tag is exactly WL_TAG_BYTES and is address-based.
+
+std::string wl_read_base_container(WL_VALUE v, bool allow_free) {
     const uint32_t tag = wl_get_tag(v);
-    if (!wl_is_address(v) || tag != WL_TAG_BYTES) {
-        throw std::runtime_error("wl_to_bytes: expected address-based BYTES tag");
+    if (!wl_is_address(v)) {
+        throw std::runtime_error("wl_to_bytes: expected address-based tag");
     }
 
     const uint32_t payload = wl_get_payload32(v);
@@ -228,6 +227,15 @@ std::string wl_to_bytes(WL_VALUE v, bool allow_free) {
     }
     return out;
 }
+
+std::string wl_to_bytes(WL_VALUE v, bool allow_free) {
+    // Strict: only accept a value whose tag is exactly WL_TAG_BYTES and is address-based.
+    const uint32_t tag = wl_get_tag(v);
+    if (!wl_is_address(v) || tag != WL_TAG_BYTES) {
+        throw std::runtime_error("wl_to_bytes: expected address-based BYTES tag");
+    }
+    return wl_read_base_container(v, allow_free);
+}
  
 std::string wl_to_msgpack(WL_VALUE v, bool allow_free) {
     // Strict: only accept MSGPACK tag.
@@ -235,8 +243,7 @@ std::string wl_to_msgpack(WL_VALUE v, bool allow_free) {
     if (!wl_is_address(v) || tag != WL_TAG_MSGPACK) {
         throw std::runtime_error("wl_to_msgpack: expected address-based MSGPACK tag");
     }
-    // Reuse wl_to_bytes which will perform the container read and free if needed.
-    return wl_to_bytes(v, allow_free);
+    return wl_read_base_container(v, allow_free);
 }
  
 double wl_to_f64(WL_VALUE v, bool allow_free) {

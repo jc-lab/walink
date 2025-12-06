@@ -189,6 +189,7 @@ extern WL_VALUE wl_null() noexcept;
 extern std::string wl_to_string(WL_VALUE v, bool allow_free);
 extern std::string wl_to_bytes(WL_VALUE v, bool allow_free);
 extern std::string wl_to_msgpack(WL_VALUE v, bool allow_free);
+extern std::string wl_read_base_container(WL_VALUE v, bool allow_free);
 extern double wl_to_f64(WL_VALUE v, bool allow_free);
 
 } // namespace walink

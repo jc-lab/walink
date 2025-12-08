@@ -113,8 +113,8 @@ export class BaseContainerView extends BaseContainer {
 
 export interface WalinkCoreExports {
   memory: WebAssembly.Memory;
-  // WL_VALUE walink_alloc(uint32_t meta, uint32_t size);
-  walink_alloc(meta: number, size: number): WlValue;
+  // WL_VALUE walink_alloc(uint32_t size);
+  walink_alloc(size: number): WlValue;
   // WL_VALUE walink_free(WL_VALUE value);
   walink_free(value: WlValue): WlValue;
 }
@@ -142,7 +142,7 @@ export class Walink {
   }
 
   public wlValueAllocate(meta: number, size: number): WlAddress {
-    const wlValue = this.exports.walink_alloc(meta, size);
+    const wlValue = this.exports.walink_alloc(size);
     if (!wlValue) {
       throw new Error(`memory allocate failed (size: ${size})`);
     }

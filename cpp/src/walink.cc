@@ -20,6 +20,10 @@ WL_VALUE wl_from_bool(bool b) noexcept {
     return wl_make(meta, payload);
 }
 
+bool wl_to_bool(WL_VALUE v) noexcept {
+    return wl_get_payload32(v) != 0;
+}
+
 WL_VALUE wl_from_sint8(int32_t v) noexcept {
     const int32_t val = static_cast<int32_t>(static_cast<int8_t>(v));
     const uint32_t payload = static_cast<uint32_t>(val);

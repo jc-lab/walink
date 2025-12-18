@@ -138,6 +138,8 @@ inline WL_VALUE wl_from_address(void* ptr,
 
 extern WL_VALUE wl_from_bool(bool b) noexcept;
 
+extern bool wl_to_bool(WL_VALUE v) noexcept;
+
 extern WL_VALUE wl_from_sint8(int32_t v) noexcept;
 
 extern int32_t wl_to_sint8(WL_VALUE v) noexcept;

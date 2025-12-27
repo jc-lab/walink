@@ -123,6 +123,7 @@ export interface WalinkCoreExports {
 
 export interface WalinkOptions {
   exports: WalinkCoreExports;
+  memory: WebAssembly.Memory;
 }
 
 export class WalinkRuntime {
@@ -130,12 +131,16 @@ export class WalinkRuntime {
   private callbackSeq: number = 1;
   private _walink!: Walink;
 
-  public createWalinkFromInstance(instance: WebAssembly.Instance) {
-    const exports = instance.exports as unknown as WalinkCoreExports;
-    if (!(exports.memory instanceof WebAssembly.Memory)) {
-      throw new Error('walink: wasm instance.exports.memory must be a WebAssembly.Memory');
+  public createWalinkFromInstance(instance: WebAssembly.Instance, options?: Partial<WalinkOptions>) {
+    const exports = options?.exports || instance.exports as unknown as WalinkCoreExports;
+    const memory = options?.memory || exports.memory;
+    if (!(memory instanceof WebAssembly.Memory)) {
+      throw new Error('walink: wasm memory must be a WebAssembly.Memory');
     }
-    const o = new Walink(this, { exports });
+    const o = new Walink(this, {
+      exports: exports,
+      memory: memory,
+    });
     this._walink = o;
     return o;
   }
@@ -174,7 +179,7 @@ export class Walink {
       options: WalinkOptions
   ) {
     this.exports = options.exports;
-    this.memory = options.exports.memory;
+    this.memory = options.memory;
     this.textEncoder = new TextEncoder();
     this.textDecoder = new TextDecoder('utf-8');
   }

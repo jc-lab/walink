@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { WalinkRuntime, Walink } from '../src/walink';
+import { WalinkHost, Walink } from '../src/walink';
 import './wasm_exec.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 declare const Go: any;
 
-async function loadGoWasmInstance(runtime: WalinkRuntime): Promise<{ instance: WebAssembly.Instance, go: any }> {
+async function loadGoWasmInstance(runtime: WalinkHost): Promise<{ instance: WebAssembly.Instance, go: any }> {
   const wasmPath = path.resolve(__dirname, './go-integration-test.wasm');
   const wasmBytes = await readFile(wasmPath);
 
@@ -30,10 +30,10 @@ async function loadGoWasmInstance(runtime: WalinkRuntime): Promise<{ instance: W
 
 describe('Go WASM integration', () => {
   let walink: Walink;
-  let runtime: WalinkRuntime;
+  let runtime: WalinkHost;
 
   beforeAll(async () => {
-    runtime = new WalinkRuntime();
+    runtime = new WalinkHost();
     const { instance } = await loadGoWasmInstance(runtime);
     console.error('instance : ', instance.exports);
     walink = runtime.createWalinkFromInstance(instance, {

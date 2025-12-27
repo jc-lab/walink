@@ -126,7 +126,7 @@ export interface WalinkOptions {
   memory: WebAssembly.Memory;
 }
 
-export class WalinkRuntime {
+export class WalinkHost {
   private readonly callbacks: Record<number, (...args: any[]) => any> = {};
   private callbackSeq: number = 1;
   private _walink!: Walink;
@@ -175,7 +175,7 @@ export class Walink {
   private readonly textDecoder: TextDecoder;
 
   constructor(
-      private readonly runtime: WalinkRuntime,
+      private readonly host: WalinkHost,
       options: WalinkOptions
   ) {
     this.exports = options.exports;
@@ -433,7 +433,7 @@ export class Walink {
   }
 
   public registerCallback(cb: (...args: any[]) => any): WlValue {
-    return this.runtime.registerCallback(cb);
+    return this.host.registerCallback(cb);
   }
 
   public goCallbackHandler(callbackFn: (...args: any[]) => any, argsPtr: number, argsLen: number) {
@@ -447,6 +447,6 @@ export class Walink {
 }
 
 // Convenience helper to build Walink from a raw WebAssembly.Instance
-export function createWalinkFromInstance(runtime: WalinkRuntime, instance: WebAssembly.Instance): Walink {
-  return runtime.createWalinkFromInstance(instance);
+export function createWalinkFromInstance(instance: WebAssembly.Instance): Walink {
+  return new WalinkHost().createWalinkFromInstance(instance);
 }

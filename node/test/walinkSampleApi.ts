@@ -1,10 +1,8 @@
 import {
-  type WlTag,
   type WlValue,
-  createWalinkFromInstance,
   Walink,
-  WalinkCoreExports,
-} from "../src";
+  WalinkCoreExports, WalinkHost,
+} from '../src';
 
 // wasm 테스트 모듈이 export 하는 테스트용 C API 시그니처
 export interface WalinkTestExports extends WalinkCoreExports {
@@ -18,8 +16,11 @@ export interface WalinkTestExports extends WalinkCoreExports {
 export class WalinkWithSampleApi extends Walink {
   protected readonly testExports: WalinkTestExports;
 
-  constructor(exports: WalinkTestExports) {
-    super({ exports });
+  constructor(exports: any) {
+    super(new WalinkHost(), {
+      exports: exports,
+      memory: exports.memory,
+    });
     this.testExports = exports;
   }
 
@@ -55,9 +56,7 @@ export function createWalinkWithSampleApi(
 ): WalinkWithSampleApi {
   const exports = instance.exports as unknown as WalinkTestExports;
   if (!(exports.memory instanceof WebAssembly.Memory)) {
-    throw new Error("walink: wasm instance.exports.memory must be a WebAssembly.Memory");
+    throw new Error('walink: wasm instance.exports.memory must be a WebAssembly.Memory');
   }
-  // walink_free 가 없는 경우도 방어적으로 체크할 수 있지만,
-  // 현재 테스트 wasm 모듈은 항상 export 한다고 가정.
   return new WalinkWithSampleApi(exports);
 }

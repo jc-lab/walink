@@ -1,13 +1,10 @@
 package wlvalue
 
 import (
-	"bytes"
 	"errors"
 	"math"
 	"sync"
 	"unsafe"
-
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Value uint64

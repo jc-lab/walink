@@ -1,10 +1,13 @@
 package wlvalue
 
 import (
+	"bytes"
 	"errors"
 	"math"
 	"sync"
 	"unsafe"
+
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Value uint64
@@ -323,7 +326,7 @@ func ToBytes(v Value, allowFree bool) []byte {
 	return res
 }
 
-func ToMsgpack(v Value, allowFree bool) []byte {
+func ToMsgpackBytes(v Value, allowFree bool) []byte {
 	if !IsAddress(v) || GetTag(v) != TagMsgpack {
 		panic("walink: expected address-based MSGPACK tag")
 	}

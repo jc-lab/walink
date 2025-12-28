@@ -1,16 +1,16 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFile } from 'node:fs/promises';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from 'vitest';
 
-import { createWalinkWithSampleApi, WalinkWithSampleApi } from "./walinkSampleApi";
+import { createWalinkWithSampleApi, WalinkWithSampleApi } from './walinkSampleApi';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function loadWasmInstance(): Promise<WebAssembly.Instance> {
-  const wasmPath = path.resolve(__dirname, "../../cpp/build/walink_test.wasm");
+  const wasmPath = path.resolve(__dirname, '../../cpp/build/walink_test.wasm');
   const bytes = await readFile(wasmPath);
 
   const wasmImports = {
@@ -25,7 +25,7 @@ async function loadWasmInstance(): Promise<WebAssembly.Instance> {
   return result.instance;
 }
 
-describe("walink wasm integration", () => {
+describe('walink wasm integration', () => {
   let walink: WalinkWithSampleApi;
 
   beforeAll(async () => {
@@ -33,23 +33,23 @@ describe("walink wasm integration", () => {
     walink = createWalinkWithSampleApi(instance);
   });
 
-  it("roundtrips boolean values", () => {
+  it('roundtrips boolean values', () => {
     expect(walink.roundtripBool(true)).toBe(true);
     expect(walink.roundtripBool(false)).toBe(false);
   });
 
-  it("adds sint32 values", () => {
+  it('adds sint32 values', () => {
     expect(walink.addSint32(1, 2)).toBe(3);
     expect(walink.addSint32(-10, 5)).toBe(-5);
   });
 
-  it("creates hello string from wasm", () => {
+  it('creates hello string from wasm', () => {
     const str = walink.makeHelloString();
-    expect(str).toBe("hello from wasm");
+    expect(str).toBe('hello from wasm');
   });
 
-  it("echoes hello string through wasm", () => {
+  it('echoes hello string through wasm', () => {
     const str = walink.echoHelloString();
-    expect(str).toBe("hello from wasm");
+    expect(str).toBe('hello from wasm');
   });
 });

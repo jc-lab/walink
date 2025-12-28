@@ -14,7 +14,7 @@ func MsgpackTag(tag string) MsgpackOption {
 	}
 }
 
-func ToMsgpackDecoder(v Value, allowFree bool, out interface{}, options ...MsgpackOption) error {
+func DecodeMsgpack(v Value, allowFree bool, out interface{}, options ...MsgpackOption) error {
 	raw := ToMsgpackBytes(v, allowFree)
 	d := msgpack.NewDecoder(bytes.NewReader(raw))
 	for _, option := range options {

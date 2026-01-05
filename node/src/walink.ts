@@ -27,7 +27,6 @@ import {
 } from './wlvalue';
 
 import {pack, unpack} from 'msgpackr';
-import {TextEncoder} from 'util';
 
 const BaseContainerSize = 8;
 

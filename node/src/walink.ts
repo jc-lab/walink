@@ -1,33 +1,32 @@
 import {
-  type WlValue,
-  type WlAddress,
-  WlTag,
-  hasFreeFlag,
-  getTag,
-  getValueOrAddr,
-  toBool,
-  toSint8,
-  toUint8,
-  toSint16,
-  toUint16,
-  toSint32,
-  toUint32,
-  toFloat32,
   fromBool,
-  fromSint8,
-  fromUint8,
+  fromFloat32,
   fromSint16,
+  fromSint32,
+  fromSint8,
   fromUint16,
   fromUint32,
-  fromFloat32,
-  fromSint32,
+  fromUint8,
+  getAddress,
+  getTag,
+  getValueOrAddr,
+  hasFreeFlag,
   makeMeta,
   makeValue,
-  getAddress,
+  toBool,
+  toFloat32,
+  toSint16,
+  toSint32,
+  toSint8,
+  toUint16,
+  toUint32,
+  toUint8,
+  type WlAddress,
+  WlTag,
+  type WlValue,
 } from './wlvalue';
 
-import { pack, unpack } from 'msgpackr';
-import {TextEncoder} from "util";
+import {pack, unpack} from 'msgpackr';
 
 const BaseContainerSize = 8;
 
@@ -117,10 +116,54 @@ export interface WalinkCoreExports {
   walink_alloc(size: number): WlValue;
   // WL_VALUE walink_free(WL_VALUE value);
   walink_free(value: WlValue): WlValue;
+  // WL_VALUE (WL_VALUE v, uint32 argsPtr, uint32 argsLen) Value
+  walink_callback(value: WlValue, argsPtr: number, argsLen: number): WlValue;
 }
 
 export interface WalinkOptions {
   exports: WalinkCoreExports;
+  memory: WebAssembly.Memory;
+}
+
+export class WalinkHost {
+  private readonly callbacks: Record<number, (...args: any[]) => any> = {};
+  private callbackSeq: number = 1;
+  private _walink!: Walink;
+
+  public createWalinkFromInstance(instance: WebAssembly.Instance, options?: Partial<WalinkOptions>) {
+    const exports = options?.exports || instance.exports as unknown as WalinkCoreExports;
+    const memory = options?.memory || exports.memory;
+    if (!(memory instanceof WebAssembly.Memory)) {
+      throw new Error('walink: wasm memory must be a WebAssembly.Memory');
+    }
+    const o = new Walink(this, {
+      exports: exports,
+      memory: memory,
+    });
+    this._walink = o;
+    return o;
+  }
+
+  public goCallbackHandler(v: WlValue, argsPtr: number, argsLen: number): WlValue {
+    const tag = getTag(v);
+    if (tag != WlTag.CALLBACK) {
+      throw new Error('is not callback');
+    }
+    const callbackId = getValueOrAddr(v);
+    const callbackFn = this.callbacks[callbackId];
+    if (!callbackFn) {
+      throw new Error('no exists callback function');
+    }
+
+    return this._walink.goCallbackHandler(callbackFn, argsPtr, argsLen);
+  }
+
+  public registerCallback(cb: (...args: any[]) => any): WlValue {
+    const meta = makeMeta(WlTag.CALLBACK, false, false, false);
+    const callbackId = this.callbackSeq++;
+    this.callbacks[callbackId] = cb;
+    return makeValue(meta, callbackId);
+  }
 }
 
 // Core Walink runtime: generic WL_VALUE helpers bound to a wasm instance.
@@ -130,9 +173,12 @@ export class Walink {
   private readonly textEncoder: TextEncoder;
   private readonly textDecoder: TextDecoder;
 
-  constructor(options: WalinkOptions) {
+  constructor(
+      private readonly host: WalinkHost,
+      options: WalinkOptions
+  ) {
     this.exports = options.exports;
-    this.memory = options.exports.memory;
+    this.memory = options.memory;
     this.textEncoder = new TextEncoder();
     this.textDecoder = new TextDecoder('utf-8');
   }
@@ -384,13 +430,22 @@ export class Walink {
         return value; // raw for unsupported
     }
   }
+
+  public registerCallback(cb: (...args: any[]) => any): WlValue {
+    return this.host.registerCallback(cb);
+  }
+
+  public goCallbackHandler(callbackFn: (...args: any[]) => any, argsPtr: number, argsLen: number) {
+    const view = new BigUint64Array(this.memory.buffer, argsPtr, argsLen);
+    const args: WlValue[] = [];
+    for (let i=0; i<argsLen; i++) {
+      args[i] = view[i];
+    }
+    return callbackFn.apply(null, args);
+  }
 }
 
 // Convenience helper to build Walink from a raw WebAssembly.Instance
 export function createWalinkFromInstance(instance: WebAssembly.Instance): Walink {
-  const exports = instance.exports as unknown as WalinkCoreExports;
-  if (!(exports.memory instanceof WebAssembly.Memory)) {
-    throw new Error('walink: wasm instance.exports.memory must be a WebAssembly.Memory');
-  }
-  return new Walink({ exports });
+  return new WalinkHost().createWalinkFromInstance(instance);
 }

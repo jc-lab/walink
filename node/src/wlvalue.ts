@@ -13,6 +13,8 @@ export enum WlTag {
     UINT32 = 0x24,
     FLOAT32 = 0x30,
 
+    CALLBACK = 0x1000000,
+
     // address-based values (is-address = 1)
     FLOAT64 = 0x31,
     BYTES = 0x01,

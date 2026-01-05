@@ -20,11 +20,19 @@ jobs:
         with:
           packages: build-essential cmake python3 emscripten
 
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+
       - name: Build C++ (cmake)
         working-directory: cpp
         run: |
           emcmake cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release --parallel
+
+      - name: Build Go
+        run: |
+          GOOS=js GOARCH=wasm go build -o node/test/go-integration-test.wasm ./go/cmd/integration-test/
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
